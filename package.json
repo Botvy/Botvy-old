@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "commit": "git-cz",
+    "test": "lerna run test",
     "publish": "lerna publish --conventional-commits"
   },
   "workspaces": [
