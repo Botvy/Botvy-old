@@ -1,0 +1,18 @@
+{
+  "name": "root",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "commit": "git-cz",
+    "publish": "lerna publish --conventional-commits"
+  },
+  "workspaces": [
+    "packages/"
+  ],
+  "devDependencies": {
+    "commitizen": "^4.0.5",
+    "cz-conventional-changelog": "^3.1.0",
+    "lerna": "^3.20.2"
+  }
+}
