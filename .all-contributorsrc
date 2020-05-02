@@ -1,0 +1,26 @@
+{
+  "projectName": "Botvy",
+  "projectOwner": "Botvy",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "Readme.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "YannickFricke",
+      "name": "Yannick Fricke",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/591450?v=4",
+      "profile": "https://yannickfricke.de",
+      "contributions": [
+        "code",
+        "ideas",
+        "maintenance"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
