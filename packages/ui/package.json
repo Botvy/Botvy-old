@@ -1,0 +1,10 @@
+{
+    "name": "@botvy/ui",
+    "version": "0.0.0",
+    "license": "MIT",
+    "devDependencies": {
+        "jest": "^25.5.4",
+        "ts-jest": "^25.4.0",
+        "typescript": "^3.8.3"
+    }
+}
