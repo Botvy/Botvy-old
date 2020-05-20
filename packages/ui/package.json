@@ -2,8 +2,19 @@
     "name": "@botvy/ui",
     "version": "0.0.0",
     "license": "MIT",
+    "dependencies": {
+        "react": "^16.13.1",
+        "react-dom": "^16.13.1",
+        "react-redux": "^7.2.0",
+        "react-router-dom": "^5.2.0",
+        "redux": "^4.0.5"
+    },
     "devDependencies": {
         "@types/jest": "^25.2.3",
+        "@types/react": "^16.9.35",
+        "@types/react-dom": "^16.9.8",
+        "@types/react-redux": "^7.1.9",
+        "@types/react-router-dom": "^5.1.5",
         "jest": "^26.0.0",
         "ts-jest": "^26.0.0",
         "typescript": "^3.8.3"
