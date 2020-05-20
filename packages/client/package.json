@@ -2,7 +2,11 @@
     "name": "@botvy/client",
     "version": "0.0.0",
     "license": "MIT",
+    "dependencies": {
+        "electron-devtools-installer": "^3.0.0"
+    },
     "devDependencies": {
+        "@types/electron-devtools-installer": "^2.2.0",
         "@types/jest": "^25.2.3",
         "electron": "^9.0.0",
         "jest": "^26.0.0",
