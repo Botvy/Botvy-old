@@ -2,6 +2,11 @@
     "name": "@botvy/client",
     "version": "0.0.0",
     "license": "MIT",
+    "scripts": {
+        "build": "tsc",
+        "prestart": "yarn run build",
+        "start": "electron ./dist/index.js"
+    },
     "dependencies": {
         "electron-devtools-installer": "^3.0.0"
     },
