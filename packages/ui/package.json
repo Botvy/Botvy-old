@@ -3,6 +3,7 @@
     "version": "0.0.0",
     "license": "MIT",
     "devDependencies": {
+        "@types/jest": "^25.2.3",
         "jest": "^26.0.0",
         "ts-jest": "^26.0.0",
         "typescript": "^3.8.3"
