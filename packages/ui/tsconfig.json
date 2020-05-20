@@ -1,8 +1,10 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
+        "incremental": true,
         "declaration": true,
         "declarationMap": true,
+        "jsx": "react",
         "sourceMap": true,
         "outDir": "./dist",
         "rootDir": "./src"
