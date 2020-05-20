@@ -2,7 +2,11 @@
     "name": "@botvy/framework",
     "version": "0.0.0",
     "license": "MIT",
+    "dependencies": {
+        "winston": "^3.2.1"
+    },
     "devDependencies": {
+        "@types/winston": "^2.4.4",
         "jest": "^26.0.0",
         "ts-jest": "^26.0.0",
         "typescript": "^3.8.3"
