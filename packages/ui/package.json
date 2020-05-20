@@ -2,6 +2,11 @@
     "name": "@botvy/ui",
     "version": "0.0.0",
     "license": "MIT",
+    "scripts": {
+        "build": "webpack --config webpack.config.js",
+        "predev": "yarn run build",
+        "dev": "webpack-dev-server --hot --config webpack.config.js"
+    },
     "dependencies": {
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
