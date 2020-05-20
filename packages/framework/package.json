@@ -2,6 +2,10 @@
     "name": "@botvy/framework",
     "version": "0.0.0",
     "license": "MIT",
+    "scripts": {
+        "test": "jest",
+        "test:watch": "jest --watch"
+    },
     "dependencies": {
         "winston": "^3.2.1"
     },
