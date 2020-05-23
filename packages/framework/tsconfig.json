@@ -6,6 +6,8 @@
         "composite": true,
         "sourceMap": true,
         "outDir": "./dist",
-        "rootDir": "./src"
+        "rootDir": "./src",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
     }
 }
