@@ -4,4 +4,8 @@ module.exports = {
     setupFiles: [
         './setupJest.js',
     ],
+    testPathIgnorePatterns: [
+        '/node_modules/',
+        '/dist/',
+    ],
 };
