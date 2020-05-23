@@ -7,6 +7,7 @@
         "test:watch": "jest --watch"
     },
     "dependencies": {
+        "inversify": "^5.0.1",
         "winston": "^3.2.1"
     },
     "devDependencies": {
