@@ -8,7 +8,8 @@
         "start": "electron ./dist/index.js"
     },
     "dependencies": {
-        "electron-devtools-installer": "^3.0.0"
+        "electron-devtools-installer": "^3.0.0",
+        "inversify": "^5.0.1"
     },
     "devDependencies": {
         "@types/electron-devtools-installer": "^2.2.0",
