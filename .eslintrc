@@ -5,6 +5,9 @@
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
+    "ignorePatterns": [
+        "packages/**/dist/**/*"
+    ],
     "plugins": [
         "jsx-a11y"
     ],
