@@ -27,6 +27,11 @@ export interface IPlugin {
      * Contains a list of all plugin authors
      */
     authors?: IPluginAuthor[];
+
+    /**
+     * Contains a list of strings on which this plugin depends on
+     */
+    dependsOn?: string[];
 }
 
 /**
