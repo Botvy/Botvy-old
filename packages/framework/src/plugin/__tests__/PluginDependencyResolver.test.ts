@@ -43,6 +43,7 @@ describe('PluginDependencyResolver', () => {
         beforeEach(() => {
             containsPluginSpy = jest.spyOn(
                 pluginDependencyResolver,
+                // eslint-disable-next-line
                 // @ts-ignore
                 'containsPlugin',
             );
@@ -56,6 +57,7 @@ describe('PluginDependencyResolver', () => {
 
         it('should not add a plugin twice or more', () => {
             expect(
+                // eslint-disable-next-line
                 (pluginDependencyResolver as any).foundPlugins,
             ).toHaveLength(0);
 
@@ -63,18 +65,21 @@ describe('PluginDependencyResolver', () => {
             pluginDependencyResolver.addFoundPlugin(rootPlugin);
 
             expect(
+                // eslint-disable-next-line
                 (pluginDependencyResolver as any).foundPlugins,
             ).toHaveLength(1);
         });
 
         it('should be able to add found plugins', () => {
             expect(
+                // eslint-disable-next-line
                 (pluginDependencyResolver as any).foundPlugins,
             ).toHaveLength(0);
 
             pluginDependencyResolver.addFoundPlugin(rootPlugin);
 
             expect(
+                // eslint-disable-next-line
                 (pluginDependencyResolver as any).foundPlugins,
             ).toHaveLength(1);
         });
@@ -82,6 +87,7 @@ describe('PluginDependencyResolver', () => {
 
     describe('resolving plugins', () => {
         it('should throw an exception when a dependent plugin with an id was not found', () => {
+            // eslint-disable-next-line
             rootPlugin.dependsOn![0] = childPlugin.id + 'test';
 
             pluginDependencyResolver.addFoundPlugin(rootPlugin);
@@ -95,6 +101,7 @@ describe('PluginDependencyResolver', () => {
 
         it('should throw an exception for circular dependencies', () => {
             childPlugin.dependsOn = [
+                // eslint-disable-next-line
                 ...childPlugin.dependsOn!,
                 rootPlugin.id,
             ];
