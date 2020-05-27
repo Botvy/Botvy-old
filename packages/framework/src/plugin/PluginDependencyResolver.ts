@@ -105,7 +105,11 @@ export class PluginDependencyResolver {
 
         this.resolvingPlugins.push(plugin.id);
 
-        const pluginDependencies = plugin.dependsOn!;
+        const pluginDependencies = plugin.dependsOn;
+
+        if (pluginDependencies === undefined) {
+            return;
+        }
 
         for (const dependentPlugin of pluginDependencies) {
             if (!this.containsPlugin(this.foundPlugins, dependentPlugin)) {
@@ -117,7 +121,11 @@ export class PluginDependencyResolver {
             }
 
             // Find the dependent plugin in the found plugins
-            const childPlugin = this.foundPlugins.find((foundPlugin: IPlugin) => foundPlugin.id === dependentPlugin)!;
+            const childPlugin = this.foundPlugins.find((foundPlugin: IPlugin) => foundPlugin.id === dependentPlugin);
+
+            if (childPlugin === undefined) {
+                continue;
+            }
 
             // Check if the child plugin has any dependencies
             if (childPlugin.dependsOn === undefined || childPlugin.dependsOn.length === 0) {
