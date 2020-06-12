@@ -1,10 +1,10 @@
 import { Container } from 'inversify';
-import { PluginContainerModule } from '../ioc/module/PluginContainerModule';
+
 import { LoggerContainerModule } from '../ioc/module/LoggerContainerModule';
+import { PluginContainerModule } from '../ioc/module/PluginContainerModule';
 import { InitializationSide } from '../plugin/InitializationSide';
-import { SchemaContainerModule } from './module/SchemaContainerModule';
-import { ServiceConstants } from './ServiceConstants';
 import { TestContainerModule } from './module/TestContainerModule';
+import { ServiceConstants } from './ServiceConstants';
 
 /**
  * Returns a configured dependency injection container
@@ -24,11 +24,7 @@ export async function getConfiguredContainer(
         .bind(ServiceConstants.System.Plugin.InitializationSide)
         .toConstantValue(initializationSide);
 
-    container.load(
-        new PluginContainerModule(),
-        new SchemaContainerModule(),
-        new LoggerContainerModule(),
-    );
+    container.load(new PluginContainerModule(), new LoggerContainerModule());
 
     switch (initializationSide) {
         case InitializationSide.CLIENT:
