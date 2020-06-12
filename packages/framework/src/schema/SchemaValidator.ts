@@ -1,5 +1,5 @@
+import joi from '@hapi/joi';
 import { injectable } from 'inversify';
-import joi from 'joi';
 
 /**
  * The schema validator runs a given schema against the given input
