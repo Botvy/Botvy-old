@@ -177,3 +177,5 @@ dist
 .yarn/build-state.yml
 .pnp.*
 
+# Botvy specific directories
+plugins/
