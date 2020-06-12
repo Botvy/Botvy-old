@@ -276,25 +276,9 @@ export class DirectoryPluginLoader implements IPluginLoader {
 
             this.logger.silly(`Validated plugin schema for plugin ${pluginId}`);
 
-            // try {
-            //     const instance = this.instantiatePluginFromPath(
-            //         validatedPluginDescriptor.entrypoint,
-            //         validatedPluginDescriptor,
-            //     );
-
-            //     this.logInstance(instance);
-
-            //     this.loadedPlugins.push(instance);
-            // } catch (error) {
-            //     this.logger.error(
-            //         `Could not initialize plugin ${pluginId}: ${error}`,
-            //     );
-            //     continue;
-            // }
-
             result.push(validatedPluginDescriptor);
 
-            this.logger.debug(`Loaded plugin: ${pluginId}`);
+            this.logger.info(`Found plugin: ${pluginId}`);
         }
 
         return result;
