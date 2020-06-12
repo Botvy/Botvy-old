@@ -4,8 +4,8 @@ import { resolve } from 'path';
 import { Logger } from 'winston';
 
 import { ServiceConstants } from '../../ioc/ServiceConstants';
+import { validateSchema } from '../../schema/helper';
 import { pluginDescriptorSchema } from '../../schema/pluginDescriptor';
-import { SchemaValidator } from '../../schema/SchemaValidator';
 import { IPlugin, IPluginDescriptionFile } from '../IPlugin';
 import { IPluginAuthor } from '../IPluginAuthor';
 import { Plugin } from '../Plugin';
@@ -50,17 +50,6 @@ export class DirectoryPluginLoader implements IPluginLoader {
     private readonly directoryPath: string;
 
     /**
-     * Contains the schema validator for the plugin description file (plugin.json)
-     *
-     * @private
-     * @type {SchemaValidator<IPluginDescriptionFile>}
-     * @memberof DirectoryPluginLoader
-     */
-    private readonly schemaValidator: SchemaValidator;
-
-    private loadedPlugins: Plugin[];
-
-    /**
      * Creates an instance of DirectoryPluginLoader.
      * @param {Logger} logger The logger which should be used to log messages
      * @param {string} directoryPath The path to the directory where the plugins are located
@@ -74,8 +63,6 @@ export class DirectoryPluginLoader implements IPluginLoader {
             ServiceConstants.System.Plugin.Loader.DirectoryLoader.directoryPath,
         )
         directoryPath: string,
-        @inject(SchemaValidator)
-        schemaValidator: SchemaValidator,
     ) {
         logger.configure({
             defaultMeta: {
@@ -88,8 +75,6 @@ export class DirectoryPluginLoader implements IPluginLoader {
         this.logger = logger;
         this.container = container;
         this.directoryPath = directoryPath;
-        this.schemaValidator = schemaValidator;
-        this.loadedPlugins = [];
     }
 
     /**
@@ -168,27 +153,21 @@ export class DirectoryPluginLoader implements IPluginLoader {
             const resolvePath = (path: string) =>
                 resolve(pluginDirectory, path);
 
-            let validatedPluginDescriptor: IPluginDescriptionFile;
+            this.logger.silly('Validating the schema');
 
-            try {
-                this.logger.silly('Validating the schema');
-
-                validatedPluginDescriptor = await this.schemaValidator.validateSchema(
-                    pluginDescriptorSchema,
-                    parsedPluginDescriptor,
-                );
-                this.logger.silly('Validated the schema');
-            } catch (error) {
+            if (
+                !validateSchema(pluginDescriptorSchema, parsedPluginDescriptor)
+            ) {
                 this.logger.error(
                     `The plugin.json in the directory "${pluginDirectory}" is not valid`,
                 );
-                this.logger.error(`Error: ${error}`);
                 continue;
             }
+            this.logger.silly('Validated the schema');
 
             this.logger.silly(
                 `Validated plugin file: ${JSON.stringify(
-                    validatedPluginDescriptor,
+                    pluginDescriptorFile,
                     undefined,
                     4,
                 )}`,
@@ -244,21 +223,19 @@ export class DirectoryPluginLoader implements IPluginLoader {
                 );
             }
 
-            const { id: pluginId, entrypoint } = validatedPluginDescriptor;
+            const { id: pluginId, entrypoint } = parsedPluginDescriptor;
 
-            validatedPluginDescriptor.entrypoint = resolve(
+            parsedPluginDescriptor.entrypoint = resolve(
                 pluginDirectory,
                 entrypoint,
             );
 
             this.logger.silly(
-                `Resolved entrypoint: ${validatedPluginDescriptor.entrypoint}`,
+                `Resolved entrypoint: ${parsedPluginDescriptor.entrypoint}`,
             );
 
             if (
-                !validatedPluginDescriptor.entrypoint.startsWith(
-                    pluginDirectory,
-                )
+                !parsedPluginDescriptor.entrypoint.startsWith(pluginDirectory)
             ) {
                 this.logger.error(
                     `The entrypoint for plugin ${pluginId} is outside of the plugin directory`,
@@ -267,16 +244,16 @@ export class DirectoryPluginLoader implements IPluginLoader {
                 continue;
             }
 
-            if (!existsSync(validatedPluginDescriptor.entrypoint)) {
+            if (!existsSync(parsedPluginDescriptor.entrypoint)) {
                 this.logger.error(
-                    `The entrypoint does not exists: ${validatedPluginDescriptor.entrypoint}`,
+                    `The entrypoint does not exists: ${parsedPluginDescriptor.entrypoint}`,
                 );
                 continue;
             }
 
             this.logger.silly(`Validated plugin schema for plugin ${pluginId}`);
 
-            result.push(validatedPluginDescriptor);
+            result.push(parsedPluginDescriptor);
 
             this.logger.info(`Found plugin: ${pluginId}`);
         }
