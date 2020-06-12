@@ -4,6 +4,7 @@
     "license": "MIT",
     "private": true,
     "scripts": {
+        "client:dev": "yarn workspace @botvy/client build && nodemon --spawn --cwd . --config ./nodemon.json ./packages/client/dist/index.js",
         "commit": "git-cz",
         "test": "lerna run test",
         "lint": "eslint \"packages/**/src/**/*\"",

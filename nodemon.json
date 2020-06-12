@@ -1,0 +1,17 @@
+{
+    "cwd": "../../../",
+    "ignore": [".git", "node_modules/**/node_modules"],
+    "verbose": true,
+    "execMap": {
+        "js": "yarn workspace @botvy/client run start"
+    },
+    "events": {
+        "restart": "node -e \"console.clear()\""
+    },
+    "watch": ["packages/client/src/**/", "packages/framework/src/**/"],
+    "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "silly"
+    },
+    "ext": "js,json,ts,tsx"
+}
