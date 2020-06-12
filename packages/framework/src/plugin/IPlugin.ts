@@ -35,7 +35,7 @@ export interface IPlugin {
 }
 
 /**
- * Defines the extended data structure for the plugin descriptor file
+ * Defines the extended data structure for the plugin descriptor file.
  */
 export interface IPluginDescriptionFile extends IPlugin {
     /**
