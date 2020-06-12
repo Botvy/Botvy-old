@@ -1,4 +1,5 @@
 import { injectable } from 'inversify';
+
 import { IPlugin } from './IPlugin';
 
 /**
@@ -52,13 +53,12 @@ export class PluginDependencyResolver {
      * @return Returns true when the given plugin is in the array.
      *         Otherwise false is returned.
      */
-    private containsPlugin(
-        plugins: IPlugin[],
-        pluginId: string,
-    ) {
-        return plugins.find((plugin) => {
-            return plugin.id === pluginId;
-        }) !== undefined;
+    private containsPlugin(plugins: IPlugin[], pluginId: string) {
+        return (
+            plugins.find((plugin) => {
+                return plugin.id === pluginId;
+            }) !== undefined
+        );
     }
 
     /**
@@ -79,7 +79,10 @@ export class PluginDependencyResolver {
             }
 
             // Check if the found plugin has any dependencies
-            if (foundPlugin.dependsOn === undefined || foundPlugin.dependsOn.length === 0) {
+            if (
+                foundPlugin.dependsOn === undefined ||
+                foundPlugin.dependsOn.length === 0
+            ) {
                 // Push the plugin to the resolved ones because it doesnt have any dependencies
                 this.orderedPlugins.push(foundPlugin);
                 continue;
@@ -113,7 +116,9 @@ export class PluginDependencyResolver {
 
         for (const dependentPlugin of pluginDependencies) {
             if (!this.containsPlugin(this.foundPlugins, dependentPlugin)) {
-                throw new Error(`The plugin with the id "${dependentPlugin}" was not found`);
+                throw new Error(
+                    `The plugin with the id "${dependentPlugin}" was not found`,
+                );
             }
 
             if (this.containsPlugin(this.orderedPlugins, dependentPlugin)) {
@@ -121,14 +126,19 @@ export class PluginDependencyResolver {
             }
 
             // Find the dependent plugin in the found plugins
-            const childPlugin = this.foundPlugins.find((foundPlugin: IPlugin) => foundPlugin.id === dependentPlugin);
+            const childPlugin = this.foundPlugins.find(
+                (foundPlugin: IPlugin) => foundPlugin.id === dependentPlugin,
+            );
 
             if (childPlugin === undefined) {
                 continue;
             }
 
             // Check if the child plugin has any dependencies
-            if (childPlugin.dependsOn === undefined || childPlugin.dependsOn.length === 0) {
+            if (
+                childPlugin.dependsOn === undefined ||
+                childPlugin.dependsOn.length === 0
+            ) {
                 // The child plugin does not have any dependencies
                 // So we can push it to the found plugins
                 this.orderedPlugins.push(childPlugin);
@@ -141,6 +151,8 @@ export class PluginDependencyResolver {
 
         this.orderedPlugins.push(plugin);
 
-        this.resolvingPlugins = this.resolvingPlugins.filter((resolvingPlugin) => resolvingPlugin === plugin.id);
+        this.resolvingPlugins = this.resolvingPlugins.filter(
+            (resolvingPlugin) => resolvingPlugin === plugin.id,
+        );
     }
 }
