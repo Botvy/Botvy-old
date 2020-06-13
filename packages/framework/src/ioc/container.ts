@@ -1,4 +1,5 @@
 import { Container } from 'inversify';
+import { resolve } from 'path';
 
 import { LoggerContainerModule } from '../ioc/module/LoggerContainerModule';
 import { PluginContainerModule } from '../ioc/module/PluginContainerModule';
@@ -23,6 +24,16 @@ export async function getConfiguredContainer(
     container
         .bind(ServiceConstants.System.Plugin.InitializationSide)
         .toConstantValue(initializationSide);
+
+    let cwd = process.cwd();
+
+    if (process.env.NODE_ENV === 'development') {
+        cwd = resolve(cwd, '..', '..');
+    }
+
+    container
+        .bind(ServiceConstants.System.CurrentWorkingDirectory)
+        .toConstantValue(cwd);
 
     container.load(new PluginContainerModule(), new LoggerContainerModule());
 
