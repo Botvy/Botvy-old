@@ -179,3 +179,4 @@ dist
 
 # Botvy specific directories
 plugins/
+settings.json
