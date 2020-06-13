@@ -1,4 +1,5 @@
 import joi from '@hapi/joi';
+import { Logger } from 'winston';
 
 /**
  * Validates the given input against the given schema and returns a hydrated
@@ -11,6 +12,18 @@ import joi from '@hapi/joi';
  * @throws {Error} When the input could not be validated against the schema
  * @memberof SchemaValidator
  */
-export const validateSchema = <T>(schema: joi.Schema, input: T): input is T => {
-    return schema.validate(input).errors === undefined;
+export const validateSchema = <T>(
+    schema: joi.Schema,
+    input: T,
+    logger: Logger,
+): input is T => {
+    const validationError = schema.validate(input).error;
+
+    if (validationError === undefined) {
+        return true;
+    }
+
+    logger.error(validationError.message);
+
+    return false;
 };
