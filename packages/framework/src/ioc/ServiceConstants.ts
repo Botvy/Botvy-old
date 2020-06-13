@@ -3,6 +3,7 @@
  */
 export const ServiceConstants = {
     System: {
+        CurrentWorkingDirectory: Symbol.for('System.CurrentWorkingDirectory'),
         Logger: Symbol.for('System.Logger'),
         LoggerOptions: {
             Transports: Symbol.for('System.LoggerOptions.Transports'),
