@@ -1,5 +1,5 @@
 import { ContainerModule } from 'inversify';
-import { cwd } from 'process';
+import { resolve } from 'path';
 
 import { ServiceConstants } from '../../ioc/ServiceConstants';
 import { DirectoryPluginLoader } from '../../plugin/loader/DirectoryPluginLoader';
@@ -17,7 +17,14 @@ export class PluginContainerModule extends ContainerModule {
             bind(
                 ServiceConstants.System.Plugin.Loader.DirectoryLoader
                     .directoryPath,
-            ).toConstantValue(`${cwd()}/plugins`);
+            ).toDynamicValue(({ container }) => {
+                return resolve(
+                    container.get(
+                        ServiceConstants.System.CurrentWorkingDirectory,
+                    ),
+                    'plugins',
+                );
+            });
         });
     }
 }
