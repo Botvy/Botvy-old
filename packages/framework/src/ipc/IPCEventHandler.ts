@@ -1,7 +1,7 @@
 import { IpcMainInvokeEvent } from 'electron';
 import { injectable, unmanaged } from 'inversify';
 
-import { IPCResult } from './IIPCResult';
+import { IPCResult } from './IPCResult';
 
 /**
  * Defines a basic IPC (inter process communication) event handler
