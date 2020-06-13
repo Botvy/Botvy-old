@@ -1,3 +1,4 @@
+import { IPluginDescriptionFile } from '../IPlugin';
 import { Plugin } from '../Plugin';
 
 /**
@@ -13,5 +14,7 @@ export interface IPluginInstantiator {
      *
      * @memberof IPluginInstantiator
      */
-    instantiatePlugins: () => Promise<Plugin[]>;
+    instantiatePlugins: (
+        pluginDescriptorFiles: IPluginDescriptionFile[],
+    ) => Promise<Plugin[]>;
 }

@@ -27,32 +27,26 @@ export class ModulePluginInstantiator implements IPluginInstantiator {
     private logger: Logger;
 
     /**
-     * Contains the plugin description files (file or database based)
-     *
-     * @type {IPluginDescriptionFile[]}
-     * @memberof ModulePluginInstantiator
-     */
-    public pluginDescriptorFiles: IPluginDescriptionFile[];
-
-    /**
      * Creates an instance of ModulePluginInstantiator.
      * @param {Logger} logger The logger which should be used to log messages
      * @memberof ModulePluginInstantiator
      */
     constructor(@inject(ServiceConstants.System.Logger) logger: Logger) {
         this.logger = logger;
-        this.pluginDescriptorFiles = [];
     }
 
     /**
      * Instantiates the plugins based off their entrypoint
      *
+     * @param {IPluginDescriptionFile[]} pluginDescriptorFiles The array of found plugin descriptor files which should be loaded.
      * @returns {Promise<Plugin[]>} The loaded plugins
      * @memberof ModulePluginInstantiator
      */
-    public async instantiatePlugins(): Promise<Plugin[]> {
+    public async instantiatePlugins(
+        pluginDescriptorFiles: IPluginDescriptionFile[],
+    ): Promise<Plugin[]> {
         const result: Plugin[] = [];
-        const filteredPluginDescriptorFiles = this.pluginDescriptorFiles.map(
+        const filteredPluginDescriptorFiles = pluginDescriptorFiles.map(
             (pluginDescriptorFile) =>
                 this.checkIfPathExists(pluginDescriptorFile.entrypoint),
         );
