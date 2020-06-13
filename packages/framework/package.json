@@ -13,11 +13,12 @@
         "winston": "^3.2.1"
     },
     "devDependencies": {
-        "@types/jest": "^26.0.0",
         "@types/hapi__joi": "^17.1.2",
+        "@types/jest": "^26.0.0",
         "@types/winston": "^2.4.4",
         "jest": "^26.0.0",
         "ts-jest": "^26.0.0",
+        "typeorm": "^0.2.25",
         "typescript": "^3.8.3"
     }
 }
