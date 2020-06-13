@@ -1,10 +1,56 @@
-import { app, BrowserWindow } from 'electron';
-import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer';
+import 'reflect-metadata';
+
+import { ServiceConstants } from '@botvy/framework/dist/ioc/ServiceConstants';
+import { IPCEventHandler } from '@botvy/framework/dist/ipc/IPCEventHandler';
+import { configureLogger } from '@botvy/framework/dist/logging/logger';
+import { app, BrowserWindow, ipcMain } from 'electron';
+import installExtension, {
+    REACT_DEVELOPER_TOOLS,
+    REDUX_DEVTOOLS,
+} from 'electron-devtools-installer';
+import { Logger } from 'winston';
+
+import { getClientContainer } from './ioc/container';
 
 /**
  * The electron window
  */
 let mainWindow: BrowserWindow;
+
+(async () => {
+    const container = await getClientContainer();
+
+    const logger = container.get<Logger>(ServiceConstants.System.Logger);
+    configureLogger(logger, 'Client');
+
+    try {
+        const ipcEventHandlers = container.getAll(IPCEventHandler);
+
+        ipcEventHandlers.forEach((eventHandler) => {
+            ipcMain.handle(eventHandler.eventName, eventHandler.handleEvent);
+        });
+    } catch (error) {
+        logger.error(`Could not start the client: ${error}`);
+        process.exit(1);
+    }
+})();
+
+/**
+ * Installs the react and redux chrome extension in electron
+ */
+function installDeveloperTools() {
+    [REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS].forEach((element) => {
+        /* tslint:disable */
+        installExtension(element)
+            .then(({ name }: any) => {
+                console.log(`Added extension: ${name}`);
+            })
+            .catch((err: Error) => {
+                console.log('An error occurred: ', err);
+            });
+        /* tslint:enable */
+    });
+}
 
 /**
  * Gets called when the electron window is ready to show
@@ -19,6 +65,9 @@ function onReady() {
         title: name,
         width: 800,
         titleBarStyle: 'hidden',
+        webPreferences: {
+            nodeIntegration: true,
+        },
     });
 
     let urlToLoad = '';
@@ -42,18 +91,3 @@ function onReady() {
 
 app.on('ready', () => onReady());
 app.on('window-all-closed', () => app.quit());
-
-/**
- * Installs the react and redux chrome extension in electron
- */
-function installDeveloperTools() {
-    [REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS].forEach((element) => {
-        /* tslint:disable */
-        installExtension(element).then(({ name }: any) => {
-            console.log(`Added extension: ${name}`);
-        }).catch((err: Error) => {
-            console.log('An error occurred: ', err);
-        });
-        /* tslint:enable */
-    });
-}
