@@ -1,4 +1,4 @@
-import { ContainerModule } from 'inversify';
+import { ContainerModule, interfaces } from 'inversify';
 import { createLogger, format, transports } from 'winston';
 
 import { ServiceConstants } from '../../ioc/ServiceConstants';
@@ -19,14 +19,26 @@ export class LoggerContainerModule extends ContainerModule {
     constructor() {
         super((bind) => {
             bind(ServiceConstants.System.Logger).toDynamicValue(
-                ({ container }) =>
-                    createLogger({
+                ({ container, currentRequest }) => {
+                    let tags: string[] = [];
+
+                    if (currentRequest.parentRequest !== null) {
+                        tags = this.getTags(
+                            currentRequest.parentRequest.target,
+                        );
+                    }
+
+                    return createLogger({
                         level: process.env.LOG_LEVEL ?? 'info',
                         transports: container.getAll(
                             ServiceConstants.System.LoggerOptions.Transports,
                         ),
+                        defaultMeta: {
+                            tags,
+                        },
                         format: format.combine(...container.getAll(format)),
-                    }),
+                    });
+                },
             );
 
             // Bind the formatters
@@ -77,6 +89,55 @@ export class LoggerContainerModule extends ContainerModule {
         result += ` ${prefix}`;
         result += tags.join(joinSeparator);
         result += `${suffix}`;
+
+        return result;
+    }
+
+    /**
+     * Returns an array which contains the name of the service which will be instantiated.
+     *
+     * @private
+     * @param {interfaces.Target} target
+     * @returns
+     * @memberof LoggerContainerModule
+     */
+    private getTags(target: interfaces.Target) {
+        const result: string[] = [];
+
+        const serviceIdentifierValue = target.serviceIdentifier.valueOf();
+
+        /* eslint-disable no-case-declarations */
+
+        switch (typeof serviceIdentifierValue) {
+            case 'symbol':
+                const symbolValue = serviceIdentifierValue.toString();
+
+                if (!symbolValue.includes('.')) {
+                    return result;
+                }
+
+                const identifierRegex = /^Symbol\((\w+\.)+(\w+)\)$/;
+                const regexResult = identifierRegex.exec(symbolValue);
+
+                if (regexResult === null) {
+                    return result;
+                }
+
+                result.push(regexResult[2]);
+
+                break;
+            case 'function':
+                result.push(serviceIdentifierValue.name);
+                break;
+            case 'string':
+                if (serviceIdentifierValue.includes('.')) {
+                    const parts = serviceIdentifierValue.split('.');
+                    result.push(parts[parts.length - 1]);
+                } else {
+                    result.push(serviceIdentifierValue);
+                }
+                break;
+        }
 
         return result;
     }

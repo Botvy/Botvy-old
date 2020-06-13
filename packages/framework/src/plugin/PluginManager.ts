@@ -79,14 +79,6 @@ export class PluginManager {
         @multiInject(ServiceConstants.System.Plugin.Loader.PluginLoader)
         pluginLoaders: IPluginLoader[],
     ) {
-        logger.configure({
-            defaultMeta: {
-                tags: [PluginManager.name],
-            },
-            transports: logger.transports,
-            level: logger.level,
-        });
-
         this.logger = logger;
         this.loadedPlugins = [];
         this.pluginDependencyResolver = pluginDependencyResolver;
