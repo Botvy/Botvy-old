@@ -64,13 +64,6 @@ export class DirectoryPluginLoader implements IPluginLoader {
         )
         directoryPath: string,
     ) {
-        logger.configure({
-            defaultMeta: {
-                tags: [DirectoryPluginLoader.name],
-            },
-            transports: logger.transports,
-        });
-
         this.name = 'Directory plugin loader';
         this.logger = logger;
         this.container = container;
