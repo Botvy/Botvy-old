@@ -4,6 +4,8 @@ import { resolve } from 'path';
 import { Logger } from 'winston';
 
 import { ServiceConstants } from '../ioc/ServiceConstants';
+import { clientSettingsSchema } from '../schema/clientSettings';
+import { validateSchema } from '../schema/helper';
 import { IClientSettings } from './IClientSettings';
 
 /**
@@ -60,8 +62,19 @@ export class ClientSettingsHandler {
         }
 
         const fileContents = readFileSync(this.settingsFilePath, 'utf-8');
+        const parsedSettingsFile = JSON.parse(fileContents);
 
-        return JSON.parse(fileContents);
+        if (
+            !validateSchema<IClientSettings>(
+                clientSettingsSchema,
+                parsedSettingsFile,
+                this.logger,
+            )
+        ) {
+            throw new Error('Settings file not valid');
+        }
+
+        return parsedSettingsFile;
     }
 
     public saveSettings(settings: IClientSettings) {
