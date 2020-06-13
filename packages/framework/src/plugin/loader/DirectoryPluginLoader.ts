@@ -156,7 +156,11 @@ export class DirectoryPluginLoader implements IPluginLoader {
             this.logger.silly('Validating the schema');
 
             if (
-                !validateSchema(pluginDescriptorSchema, parsedPluginDescriptor)
+                !validateSchema(
+                    pluginDescriptorSchema,
+                    parsedPluginDescriptor,
+                    this.logger,
+                )
             ) {
                 this.logger.error(
                     `The plugin.json in the directory "${pluginDirectory}" is not valid`,
