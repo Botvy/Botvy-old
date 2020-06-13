@@ -4,6 +4,7 @@ import { resolve } from 'path';
 import { LoggerContainerModule } from '../ioc/module/LoggerContainerModule';
 import { PluginContainerModule } from '../ioc/module/PluginContainerModule';
 import { InitializationSide } from '../plugin/InitializationSide';
+import { ClientSettingsHandler } from '../settings/ClientSettingsLoader';
 import { TestContainerModule } from './module/TestContainerModule';
 import { ServiceConstants } from './ServiceConstants';
 
@@ -39,6 +40,7 @@ export async function getConfiguredContainer(
 
     switch (initializationSide) {
         case InitializationSide.CLIENT:
+            container.bind(ClientSettingsHandler).toSelf();
             break;
         case InitializationSide.SERVER:
             break;
