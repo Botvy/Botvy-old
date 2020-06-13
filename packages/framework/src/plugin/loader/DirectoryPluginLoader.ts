@@ -8,7 +8,6 @@ import { validateSchema } from '../../schema/helper';
 import { pluginDescriptorSchema } from '../../schema/pluginDescriptor';
 import { IPlugin, IPluginDescriptionFile } from '../IPlugin';
 import { IPluginAuthor } from '../IPluginAuthor';
-import { Plugin } from '../Plugin';
 import { IPluginLoader } from './IPluginLoader';
 
 /**
@@ -257,54 +256,7 @@ export class DirectoryPluginLoader implements IPluginLoader {
 
         return result;
     }
-    logInstance({
-        id: pluginId,
-        name: pluginName,
-        version: pluginVersion,
-        dependsOn: pluginDependencies,
-        authors: pluginAuthors,
-        entrypoint: pluginEntrypoint,
-        additionalContainerBindings: pluginContainerBindings,
-        sectionComponents: pluginSectionComponents,
-    }: Plugin) {
-        this.logger.debug(`Found plugin: ${pluginId}`);
-        this.logger.debug(`- ID: ${pluginId}`);
-        this.logger.debug(`- Name: ${pluginName}`);
-        this.logger.debug(`- Version: ${pluginVersion}`);
 
-        if (pluginDependencies !== undefined && pluginDependencies.length > 0) {
-            this.logger.debug(
-                `- Plugin dependencies: ${pluginDependencies.join(', ')}`,
-            );
-        }
-
-        if (pluginAuthors !== undefined && pluginAuthors.length > 0) {
-            this.logger.debug(
-                `- Authors: ${this.getFormattedAuthors(pluginAuthors)}`,
-            );
-        }
-
-        this.logger.debug(`- Entrypoint: ${pluginEntrypoint}`);
-
-        if (
-            pluginContainerBindings !== undefined &&
-            pluginContainerBindings.length > 0
-        ) {
-            this.logger.debug(
-                `- Container bindings: ${pluginContainerBindings.join(', ')}`,
-            );
-        }
-
-        if (pluginSectionComponents !== undefined) {
-            this.logger.debug(
-                `- Section comoponents: ${JSON.stringify(
-                    pluginSectionComponents,
-                    undefined,
-                    4,
-                )}`,
-            );
-        }
-    }
     getFormattedAuthors(authors: IPluginAuthor[]) {
         return authors
             .map((author) =>
@@ -321,53 +273,6 @@ export class DirectoryPluginLoader implements IPluginLoader {
                     .join(' '),
             )
             .join(', ');
-    }
-
-    /**
-     * Instantiates a new Plugin from the given entrypoint
-     * It requires the path and sets the plugin metadata
-     * informations for it
-     *
-     * @private
-     * @param {string} resolvedEntrypoint The resolved path to the plugin entrypoint
-     * @param {IPluginDescriptionFile} pluginMetadata The plugin metadata informations
-     * @throws When the plugin could not be instantiated
-     * @returns {Plugin} The instantiated plugin
-     * @memberof DirectoryPluginLoader
-     */
-    private instantiatePluginFromPath(
-        resolvedEntrypoint: string,
-        pluginMetadata: IPluginDescriptionFile,
-    ): Plugin {
-        const LoadingPlugin = require(resolvedEntrypoint).default;
-
-        this.logger.silly(
-            `Binding ${LoadingPlugin.name} to ${pluginMetadata.id}`,
-        );
-        this.container.bind(pluginMetadata.id).to(LoadingPlugin);
-        this.logger.silly(
-            `Bound ${LoadingPlugin.name} to ${pluginMetadata.id}`,
-        );
-
-        this.logger.debug(`Trying to instantiate the plugin`);
-        const instance: Plugin = this.container.get<Plugin>(pluginMetadata.id);
-
-        instance.id = pluginMetadata.id;
-        instance.name = pluginMetadata.name;
-        instance.version = pluginMetadata.version;
-        instance.authors = pluginMetadata.authors ?? [];
-        instance.entrypoint = pluginMetadata.entrypoint;
-        instance.additionalContainerBindings =
-            pluginMetadata.additionalContainerBindings;
-        instance.sectionComponents = pluginMetadata.sectionComponents ?? {};
-
-        this.logger.debug(`Plugin instantiated`);
-
-        this.logger.silly(
-            `Instance container bindings: ${instance.additionalContainerBindings}`,
-        );
-
-        return instance;
     }
 
     checkDirectoryPath() {
