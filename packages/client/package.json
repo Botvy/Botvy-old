@@ -17,6 +17,7 @@
         "electron": "^9.0.0",
         "jest": "^26.0.0",
         "ts-jest": "^26.0.0",
+        "typeorm": "^0.2.25",
         "typescript": "^3.8.3"
     }
 }
