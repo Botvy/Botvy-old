@@ -22,10 +22,7 @@ export class LoadClientSettingsIPCHandler extends IPCEventHandler<
         configureLogger(logger, LoadClientSettingsIPCHandler.name);
     }
 
-    async handleEvent(
-        event: Electron.IpcMainInvokeEvent,
-        args: string[],
-    ): Promise<IPCResult<IClientSettings>> {
+    async handleEvent(): Promise<IPCResult<IClientSettings>> {
         this.logger.info('Loading client settings');
 
         try {
