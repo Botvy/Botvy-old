@@ -18,6 +18,7 @@ export const ServiceConstants = {
                     ),
                 },
             },
+            Instantiator: Symbol.for('System.Plugin.Instantiator'),
         },
     },
 };

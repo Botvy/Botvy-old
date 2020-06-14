@@ -1,8 +1,9 @@
-import { inject, injectable, multiInject } from 'inversify';
+import { IPluginInstantiator } from '@botvy/framework/plugin/instantiator/IPluginInstantiator';
+import { inject, injectable } from 'inversify';
 import { Logger } from 'winston';
 
 import { ServiceConstants } from '../ioc/ServiceConstants';
-import { IPlugin } from './IPlugin';
+import { IPlugin, IPluginDescriptionFile } from './IPlugin';
 import { IPluginLoader } from './loader/IPluginLoader';
 import { Plugin } from './Plugin';
 import { PluginDependencyResolver } from './PluginDependencyResolver';
@@ -17,26 +18,6 @@ import { PluginDependencyResolver } from './PluginDependencyResolver';
  */
 @injectable()
 export class PluginManager {
-    /**
-     * The logger which will be used to log messages
-     *
-     * @private
-     * @type {Logger}
-     * @memberof PluginManager
-     */
-    private readonly logger: Logger;
-
-    /**
-     * Contains the plugin dependency resolver
-     * The resolver determines the correct order of the plugins
-     * in which they should be loaded cause of their dependencies
-     *
-     * @private
-     * @type {PluginDependencyResolver}
-     * @memberof PluginManager
-     */
-    private readonly pluginDependencyResolver: PluginDependencyResolver;
-
     /**
      * Contains the loaded plugins
      *
@@ -56,90 +37,47 @@ export class PluginManager {
     public orderedPlugins: IPlugin[];
 
     /**
-     * Contains all the plugin loaders
-     *
-     * @private
-     * @type {IPluginLoader[]}
-     * @memberof PluginManager
-     */
-    private pluginLoaders: IPluginLoader[];
-
-    /**
      * Creates an instance of PluginManager.
      * @param {Logger} logger The logger which should be used to log messages
      * @param {PluginDependencyResolver} pluginDependencyResolver The plugin dependency resolver which should be used
      *                                                            for determining the correct order of the plugins
-     * @param {IPluginLoader[]} pluginLoaders The plugin loaders which loads plugins from backends (directory based, database based)
+     * @param {IPluginLoader} pluginLoader The plugin loader which loads plugins from a backend
+     * @param {IPluginInstantiator} pluginInstantiator The plugin instantiator instantiates plugins based on their
+     *                                                 IPluginDescriptionFile
      * @memberof PluginManager
      */
     constructor(
-        @inject(ServiceConstants.System.Logger) logger: Logger,
+        @inject(ServiceConstants.System.Logger)
+        private readonly logger: Logger,
         @inject(PluginDependencyResolver)
-        pluginDependencyResolver: PluginDependencyResolver,
-        @multiInject(ServiceConstants.System.Plugin.Loader.PluginLoader)
-        pluginLoaders: IPluginLoader[],
+        private readonly pluginDependencyResolver: PluginDependencyResolver,
+        @inject(ServiceConstants.System.Plugin.Loader.PluginLoader)
+        private readonly pluginLoader: IPluginLoader,
+        @inject(ServiceConstants.System.Plugin.Instantiator)
+        private readonly pluginInstantiator: IPluginInstantiator,
     ) {
-        this.logger = logger;
         this.loadedPlugins = [];
-        this.pluginDependencyResolver = pluginDependencyResolver;
         this.orderedPlugins = [];
-        this.pluginLoaders = pluginLoaders;
     }
 
     /**
      * Loads all plugins from the plugin loaders
      *
+     * @param {string[]} activePlugins An array of all activated plugin ids
      * @memberof PluginManager
      */
-    public async loadPlugins() {
-        const pluginLoaderNames = this.pluginLoaders
-            .map((pluginLoader) => pluginLoader.name)
-            .join(', ');
-        this.logger.debug(`Plugin loaders: ${pluginLoaderNames}`);
-
-        for (const pluginLoader of this.pluginLoaders) {
-            const loadedPlugins = await pluginLoader.loadPlugins();
-
-            for (const loadedPlugin of loadedPlugins) {
-                this.pluginDependencyResolver.addFoundPlugin(loadedPlugin);
-                this.logger.debug(
-                    `Added the following plugin: ${loadedPlugin.name} (${loadedPlugin.id})`,
-                );
-            }
-
-            this.logger.info(
-                `Loaded ${loadedPlugins.length} plugin${
-                    loadedPlugins.length === 1 ? '' : 's'
-                } from loader "${pluginLoader.name}"`,
-            );
-        }
+    public async loadPlugins(activePlugins: string[]) {
+        const availablePlugins = await this.pluginLoader.loadPlugins();
+        availablePlugins.filter(plugin => {
+            return activePlugins.includes(plugin.id);
+        }).forEach(plugin => {
+            this.pluginDependencyResolver.addFoundPlugin(plugin);
+        });
 
         this.orderedPlugins = this.pluginDependencyResolver.resolvePlugins();
-
-        this.logger.info(
-            `Loaded plugins: ${this.formatPluginsDisplay(this.orderedPlugins)}`,
+        this.loadedPlugins = await this.pluginInstantiator.instantiatePlugins(
+            this.orderedPlugins as IPluginDescriptionFile[],
         );
-    }
-
-    /**
-     * Formats the given IPlugin array to a string
-     *
-     * @private
-     * @param {IPlugin[]} plugins The plugins to stringify
-     * @returns {string} The stringified plugins
-     * @memberof PluginManager
-     */
-    private formatPluginsDisplay(plugins: IPlugin[]): string {
-        switch (plugins.length) {
-            case 0:
-                return 'No plugins found';
-            case 1:
-                return `1 Plugin (${this.getPluginNames(plugins)})`;
-            default:
-                return `${plugins.length} Plugins (${this.getPluginNames(
-                    plugins,
-                )})`;
-        }
     }
 
     /**
@@ -163,22 +101,5 @@ export class PluginManager {
                 );
             }
         }
-    }
-
-    /**
-     * Returns a string representation of the given plugins
-     *
-     * @private
-     * @param {IPlugin[]} plugins The plugins to get the strings for
-     * @returns The joined string
-     * @memberof PluginManager
-     */
-    private getPluginNames(plugins: IPlugin[]) {
-        return plugins
-            .map(
-                (loadedPlugin) =>
-                    `${loadedPlugin.id}@${loadedPlugin.version} (${loadedPlugin.name})`,
-            )
-            .join(', ');
     }
 }
