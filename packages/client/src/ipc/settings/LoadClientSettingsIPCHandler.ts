@@ -9,9 +9,7 @@ import { inject, injectable } from 'inversify';
 import { Logger } from 'winston';
 
 @injectable()
-export class LoadClientSettingsIPCHandler extends IPCEventHandler<
-    IClientSettings
-> {
+export class LoadClientSettingsIPCHandler extends IPCEventHandler<IClientSettings, unknown> {
     constructor(
         @inject(ClientSettingsHandler)
         private readonly clientSettingsLoader: ClientSettingsHandler,

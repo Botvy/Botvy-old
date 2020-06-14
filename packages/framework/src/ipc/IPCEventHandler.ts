@@ -7,7 +7,7 @@ import { IPCResult } from './IPCResult';
  * Defines a basic IPC (inter process communication) event handler
  */
 @injectable()
-export abstract class IPCEventHandler<T> {
+export abstract class IPCEventHandler<T, U> {
     /**
      * The name of the event which will be handled by the event handler
      */
@@ -29,12 +29,12 @@ export abstract class IPCEventHandler<T> {
      *
      * @abstract
      * @param {IpcMainInvokeEvent} event The incoming IPC event
-     * @param {string[]} args The event arguments
+     * @param {U} args The event arguments
      * @returns {Promise<IPCResult<T>>} The resolved IPC result
      * @memberof IPCEventHandler
      */
     public abstract async handleEvent(
         event: IpcMainInvokeEvent,
-        args: string[],
+        args: U,
     ): Promise<IPCResult<T>>;
 }

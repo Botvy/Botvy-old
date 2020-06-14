@@ -6,7 +6,7 @@ import { ThemeManager } from '@botvy/framework/dist/theming/ThemeManager';
 import { inject, injectable } from 'inversify';
 
 @injectable()
-export class LoadThemeIPCHandler extends IPCEventHandler<ITheme> {
+export class LoadThemeIPCHandler extends IPCEventHandler<ITheme, string[]> {
     constructor(
         @inject(ThemeManager)
         private readonly themeManager: ThemeManager,
