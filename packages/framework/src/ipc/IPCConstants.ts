@@ -3,6 +3,9 @@
  */
 export const IPCConstants = {
     Core: {
+        Plugins: {
+            LoadActive: Symbol.for('Core.Plugins.LoadActive'),
+        },
         Settings: {
             Load: Symbol.for('Core.IPC.Settings.Load'),
         },

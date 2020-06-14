@@ -1,12 +1,13 @@
 import { IPCConstants } from '@botvy/framework/dist/ipc/IPCConstants';
 import { IPCResult } from '@botvy/framework/dist/ipc/IPCResult';
+import { IPluginDescriptionFile } from '@botvy/framework/dist/plugin/IPlugin';
 import { IClientSettings } from '@botvy/framework/dist/settings/IClientSettings';
 import { ITheme } from '@botvy/framework/dist/theming/ITheme';
 import { IpcRenderer } from 'electron';
 import { setTheme } from 'packages/ui/src/store/theme/theme.actions';
 import { Store } from 'redux';
 
-import { finishInitialization, setStepInfo } from './store/initialization/initialization.actions';
+import { finishInitialization, initializationFailed, setStepInfo } from './store/initialization/initialization.actions';
 
 /**
  * A helper class for initializing the electron client
@@ -61,6 +62,16 @@ export class ApplicationInitializator {
         }
 
         this.store.dispatch(setTheme(loadedTheme.data!));
+
+        this.store.dispatch(setStepInfo('Loading plugins'));
+
+        const loadPluginsResult = await this.loadPlugins(activePlugins);
+
+        if (loadPluginsResult.error) {
+            this.store.dispatch(initializationFailed(loadPluginsResult.error));
+            return;
+        }
+
         this.store.dispatch(finishInitialization());
     }
 
@@ -89,6 +100,13 @@ export class ApplicationInitializator {
         return await this.ipcRenderer.invoke(
             IPCConstants.Core.Theming.LoadTheme.toString(),
             [themeName],
+        );
+    }
+
+    private async loadPlugins(activePlugins: string[]): Promise<IPCResult<IPluginDescriptionFile>> {
+        return await this.ipcRenderer.invoke(
+            IPCConstants.Core.Plugins.LoadActive.toString(),
+            activePlugins,
         );
     }
 }
