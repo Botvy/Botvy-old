@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
-import { Container, inject, injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { resolve } from 'path';
 import { Logger } from 'winston';
 
@@ -7,7 +7,6 @@ import { ServiceConstants } from '../../ioc/ServiceConstants';
 import { validateSchema } from '../../schema/helper';
 import { pluginDescriptorSchema } from '../../schema/pluginDescriptor';
 import { IPlugin, IPluginDescriptionFile } from '../IPlugin';
-import { IPluginAuthor } from '../IPluginAuthor';
 import { IPluginLoader } from './IPluginLoader';
 
 /**
@@ -31,15 +30,6 @@ export class DirectoryPluginLoader implements IPluginLoader {
     private readonly logger: Logger;
 
     /**
-     * Contains the dependency injection container
-     *
-     * @private
-     * @type {Container}
-     * @memberof DirectoryPluginLoader
-     */
-    private readonly container: Container;
-
-    /**
      * Contains the path to the directory where the plugins are located
      *
      * @private
@@ -52,12 +42,10 @@ export class DirectoryPluginLoader implements IPluginLoader {
      * Creates an instance of DirectoryPluginLoader.
      * @param {Logger} logger The logger which should be used to log messages
      * @param {string} directoryPath The path to the directory where the plugins are located
-     * @param {SchemaValidator<IPluginDescriptionFile>} schemaValidator The schema validator for the plugin.json file
      * @memberof DirectoryPluginLoader
      */
     constructor(
         @inject(ServiceConstants.System.Logger) logger: Logger,
-        @inject(Container) container: Container,
         @inject(
             ServiceConstants.System.Plugin.Loader.DirectoryLoader.directoryPath,
         )
@@ -65,7 +53,6 @@ export class DirectoryPluginLoader implements IPluginLoader {
     ) {
         this.name = 'Directory plugin loader';
         this.logger = logger;
-        this.container = container;
         this.directoryPath = directoryPath;
     }
 
@@ -142,10 +129,7 @@ export class DirectoryPluginLoader implements IPluginLoader {
                 )}`,
             );
 
-            const resolvePath = (path: string) =>
-                resolve(pluginDirectory, path);
-
-            this.logger.silly('Validating the schema');
+            this.logger.debug('Validating the schema');
 
             if (
                 !validateSchema(
@@ -159,76 +143,10 @@ export class DirectoryPluginLoader implements IPluginLoader {
                 );
                 continue;
             }
-            this.logger.silly('Validated the schema');
 
-            this.logger.silly(
-                `Validated plugin file: ${JSON.stringify(
-                    pluginDescriptorFile,
-                    undefined,
-                    4,
-                )}`,
-            );
+            const { id: pluginId } = parsedPluginDescriptor;
 
-            this.logger.silly(`Remapping the additional container bindings`);
-
-            parsedPluginDescriptor.additionalContainerBindings = (
-                parsedPluginDescriptor.additionalContainerBindings ?? []
-            ).map((containerBinding) => resolvePath(containerBinding));
-
-            this.logger.silly(
-                `Remapped the additional container bindings: ${JSON.stringify(
-                    parsedPluginDescriptor.additionalContainerBindings,
-                    undefined,
-                    4,
-                )}`,
-            );
-
-            if (parsedPluginDescriptor.sectionComponents !== undefined) {
-                parsedPluginDescriptor.sectionComponents = Object.keys(
-                    parsedPluginDescriptor.sectionComponents,
-                ).reduce((acc, key) => {
-                    if (
-                        parsedPluginDescriptor.sectionComponents === undefined
-                    ) {
-                        return acc;
-                    }
-
-                    const sectionComponents =
-                        parsedPluginDescriptor.sectionComponents ?? [];
-
-                    this.logger.debug(
-                        `Section components: ${sectionComponents}`,
-                    );
-
-                    return {
-                        ...acc,
-                        [key]: (
-                            parsedPluginDescriptor.sectionComponents[key] ?? []
-                        ).map((componentPath) =>
-                            resolvePath(componentPath as string),
-                        ),
-                    };
-                }, {} as Record<string, string[]>);
-
-                this.logger.silly(
-                    `Remapped the section components: ${JSON.stringify(
-                        parsedPluginDescriptor.sectionComponents,
-                        undefined,
-                        4,
-                    )}`,
-                );
-            }
-
-            const { id: pluginId, entrypoint } = parsedPluginDescriptor;
-
-            parsedPluginDescriptor.entrypoint = resolve(
-                pluginDirectory,
-                entrypoint,
-            );
-
-            this.logger.silly(
-                `Resolved entrypoint: ${parsedPluginDescriptor.entrypoint}`,
-            );
+            this.remapDirectories(parsedPluginDescriptor, pluginDirectory);
 
             if (
                 !parsedPluginDescriptor.entrypoint.startsWith(pluginDirectory)
@@ -236,7 +154,35 @@ export class DirectoryPluginLoader implements IPluginLoader {
                 this.logger.error(
                     `The entrypoint for plugin ${pluginId} is outside of the plugin directory`,
                 );
+                continue;
+            }
 
+            if (
+                parsedPluginDescriptor.additionalContainerBindings!.some(
+                    (file) => {
+                        return !file.startsWith(pluginDirectory);
+                    },
+                )
+            ) {
+                this.logger.error(
+                    `One or more container bindings for plugin ${pluginId} are outside of the plugin directory`,
+                );
+                continue;
+            }
+
+            if (
+                Object.keys(parsedPluginDescriptor.sectionComponents!)
+                    .reduce((acc, key) => {
+                        return [
+                            ...acc,
+                            ...parsedPluginDescriptor.sectionComponents![key],
+                        ];
+                    }, [] as string[])
+                    .some((file) => !file.startsWith(pluginDirectory))
+            ) {
+                this.logger.error(
+                    `One or more section components for plugin ${pluginId} are outside of the plugin directory`,
+                );
                 continue;
             }
 
@@ -257,24 +203,12 @@ export class DirectoryPluginLoader implements IPluginLoader {
         return result;
     }
 
-    getFormattedAuthors(authors: IPluginAuthor[]) {
-        return authors
-            .map((author) =>
-                [
-                    author.name,
-                    author.email !== undefined && author.email.length > 0
-                        ? `<${author.email}>`
-                        : '',
-                    author.website !== undefined && author.website.length > 0
-                        ? `(${author.website})`
-                        : '',
-                ]
-                    .filter((entry) => entry.length > 0)
-                    .join(' '),
-            )
-            .join(', ');
-    }
-
+    /**
+     * Checks if the plugin directory exists.
+     * The function tries to create the directory when it not exists.
+     *
+     * @memberof DirectoryPluginLoader
+     */
     checkDirectoryPath() {
         const resolvedPath = resolve(this.directoryPath);
 
@@ -291,5 +225,59 @@ export class DirectoryPluginLoader implements IPluginLoader {
 
             this.logger.info(`Created plugin directory: ${resolvedPath}`);
         }
+    }
+
+    /**
+     * Remaps the file paths of the given plugin descriptor to be based of the plugin directory
+     *
+     * @private
+     * @param {IPluginDescriptionFile} pluginDescriptor The plugin descriptor file which should be modified
+     * @param {string} pluginDirectory The path to the plugin directory
+     * @memberof DirectoryPluginLoader
+     */
+    private remapDirectories(
+        pluginDescriptor: IPluginDescriptionFile,
+        pluginDirectory: string,
+    ) {
+        this.logger.silly(
+            `Remapping entrypoint for plugin: ${pluginDescriptor.id}`,
+        );
+        pluginDescriptor.entrypoint = resolve(
+            pluginDirectory,
+            pluginDescriptor.entrypoint,
+        );
+        this.logger.silly(
+            `Remapped entrypoint for plugin: ${pluginDescriptor.id}`,
+        );
+
+        this.logger.silly(
+            `Remapping container bindings for plugin: ${pluginDescriptor.id}`,
+        );
+        pluginDescriptor.additionalContainerBindings = (
+            pluginDescriptor.additionalContainerBindings ?? []
+        ).map((file) => {
+            return resolve(pluginDirectory, file);
+        });
+        this.logger.silly(
+            `Remapped container bindings for plugin: ${pluginDescriptor.id}`,
+        );
+
+        this.logger.silly(
+            `Remapping section components for plugin: ${pluginDescriptor.id}`,
+        );
+        pluginDescriptor.sectionComponents = Object.keys(
+            pluginDescriptor.sectionComponents ?? {},
+        ).reduce(
+            (acc, key) => ({
+                ...acc,
+                [key]: pluginDescriptor.sectionComponents![key].map((file) => {
+                    return resolve(pluginDirectory, file);
+                }),
+            }),
+            {} as Record<string, string[]>,
+        );
+        this.logger.silly(
+            `Remapped section components for plugin: ${pluginDescriptor.id}`,
+        );
     }
 }
