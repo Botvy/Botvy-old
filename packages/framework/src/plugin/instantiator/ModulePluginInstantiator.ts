@@ -1,7 +1,5 @@
-import { existsSync } from 'fs';
-import { inject, injectable } from 'inversify';
+import { Container, inject, injectable } from 'inversify';
 import { IPluginInstantiator } from 'packages/framework/src/plugin/instantiator/IPluginInstantiator';
-import { resolve } from 'path';
 import { Logger } from 'winston';
 
 import { ServiceConstants } from '../../ioc/ServiceConstants';
@@ -18,20 +16,15 @@ import { Plugin } from '../Plugin';
 @injectable()
 export class ModulePluginInstantiator implements IPluginInstantiator {
     /**
-     * Contains the logger which should be used to log messages
-     *
-     * @private
-     * @type {Logger}
-     * @memberof ModulePluginInstantiator
-     */
-    private logger: Logger;
-
-    /**
      * Creates an instance of ModulePluginInstantiator.
      * @param {Logger} logger The logger which should be used to log messages
+     * @param {Container} container The container which should be used to bind the plugins into
      * @memberof ModulePluginInstantiator
      */
-    constructor(@inject(ServiceConstants.System.Logger) logger: Logger) {
+    constructor(
+        @inject(ServiceConstants.System.Logger) private logger: Logger,
+        @inject(Container) private container: Container,
+    ) {
         this.logger = logger;
     }
 
@@ -45,40 +38,89 @@ export class ModulePluginInstantiator implements IPluginInstantiator {
     public async instantiatePlugins(
         pluginDescriptorFiles: IPluginDescriptionFile[],
     ): Promise<Plugin[]> {
-        const result: Plugin[] = [];
-        const filteredPluginDescriptorFiles = pluginDescriptorFiles.map(
-            (pluginDescriptorFile) =>
-                this.checkIfPathExists(pluginDescriptorFile.entrypoint),
+        return Promise.all(
+            pluginDescriptorFiles.map(async (pluginDescriptorFile) =>
+                this.instantiatePluginFromPath(pluginDescriptorFile),
+            ),
         );
-
-        if (filteredPluginDescriptorFiles.length === 0) {
-            this.logger.warn(
-                `No plugins left after checking if their paths exists!`,
-            );
-
-            return result;
-        }
-
-        this.logger.debug(
-            `Plugin descriptor files with resolved existing paths: ${filteredPluginDescriptorFiles.length}`,
-        );
-
-        return result;
     }
 
     /**
-     * Checks if the given path exists on the
-     * file system after resolving the path
-     * to a real path
+     * Instantiates a new Plugin from the given entrypoint
+     * It requires the path and sets the plugin metadata
+     * informations for it
      *
      * @private
-     * @param {string} path The path which should be resolved and
-     *                      checked if it exists on the file system
+     * @param {IPluginDescriptionFile} pluginMetadata The plugin metadata informations
+     * @throws When the plugin could not be instantiated
+     * @returns {Plugin} The instantiated plugin
+     * @memberof DirectoryPluginLoader
+     */
+    private async instantiatePluginFromPath(
+        pluginMetadata: IPluginDescriptionFile,
+    ): Promise<Plugin> {
+        await this.bindAdditionalContainerBindings(
+            pluginMetadata.additionalContainerBindings ?? [],
+        );
+
+        const LoadingPlugin = this.requireDefaultExport(
+            pluginMetadata.entrypoint,
+        );
+
+        this.logger.silly(
+            `Binding ${LoadingPlugin.name} to ${pluginMetadata.id}`,
+        );
+        this.container.bind(LoadingPlugin).toSelf();
+        this.logger.silly(
+            `Bound ${LoadingPlugin.name} to ${pluginMetadata.id}`,
+        );
+
+        this.logger.debug(`Trying to instantiate the plugin`);
+        const instance: Plugin = this.container.get<Plugin>(LoadingPlugin);
+        instance.mapPluginMetadata(pluginMetadata);
+
+        this.logger.debug(`Plugin instantiated`);
+
+        return instance;
+    }
+
+    /**
+     * Binds the given container bindings to the container
      *
-     * @returns True on success. Otherwise false is returned.
+     * @private
+     * @param {string[]} additionalContainerBindings The container bindings which should be bound
      * @memberof ModulePluginInstantiator
      */
-    private checkIfPathExists(path: string) {
-        return existsSync(resolve(path));
+    private async bindAdditionalContainerBindings(
+        additionalContainerBindings: string[],
+    ) {
+        for (const containerBinding of additionalContainerBindings) {
+            this.logger.silly(
+                `Loading container bindings: ${containerBinding}`,
+            );
+            const defaultExport = this.requireDefaultExport(containerBinding);
+
+            await this.container.loadAsync(new defaultExport());
+            this.logger.debug(`Bound ${defaultExport.name} to the container`);
+        }
+    }
+
+    /**
+     * Requires a file and returns the default export.
+     * An error will be thrown when the default export does not exists.
+     *
+     * @private
+     * @param {string} file The file to load
+     * @returns The default export of the file
+     * @memberof ModulePluginInstantiator
+     */
+    private requireDefaultExport(file: string) {
+        const requiredFile = require(file);
+
+        if (requiredFile.default === undefined) {
+            throw new Error(`File "${file}" has no default export`);
+        }
+
+        return requiredFile.default;
     }
 }
