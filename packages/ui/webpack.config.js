@@ -20,6 +20,10 @@ module.exports = {
                     experimentalWatchApi: true,
                 },
             },
+            {
+                test: /\.css$/,
+                loader: 'style-loader!css-loader',
+            },
         ],
     },
     resolve: {
