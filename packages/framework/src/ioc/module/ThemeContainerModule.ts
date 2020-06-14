@@ -12,7 +12,7 @@ import { ThemeManager } from '../../theming/ThemeManager';
 export class ThemeContainerModule extends ContainerModule {
     constructor() {
         super((bind) => {
-            bind(ThemeManager).toSelf();
+            bind(ThemeManager).toSelf().inSingletonScope();
         });
     }
 }
