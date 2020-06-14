@@ -9,10 +9,10 @@ export interface IClientSettings {
     /**
      * Contains the theme name
      *
-     * @type {('dark' | 'white')}
+     * @type {string}
      * @memberof IClientSettings
      */
-    theme: 'dark' | 'white';
+    theme: string;
 
     /**
      * Contains the plugin ids of all active plugins
