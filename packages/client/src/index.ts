@@ -81,6 +81,7 @@ function onReady() {
         titleBarStyle: 'hidden',
         webPreferences: {
             nodeIntegration: true,
+            backgroundThrottling: false,
         },
     });
 
