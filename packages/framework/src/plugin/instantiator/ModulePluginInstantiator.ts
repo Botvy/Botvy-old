@@ -67,6 +67,10 @@ export class ModulePluginInstantiator implements IPluginInstantiator {
             pluginMetadata.entrypoint,
         );
 
+        if (this.container.isBound(LoadingPlugin)) {
+            this.container.unbind(LoadingPlugin);
+        }
+
         this.logger.silly(
             `Binding ${LoadingPlugin.name} to ${pluginMetadata.id}`,
         );
