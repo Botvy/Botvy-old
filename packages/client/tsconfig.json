@@ -8,5 +8,6 @@
         "rootDir": "./src",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true
-    }
+    },
+    "exclude": ["./plugins", "./dist"]
 }

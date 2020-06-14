@@ -4,9 +4,10 @@
     "license": "MIT",
     "private": true,
     "scripts": {
+        "client:dev": "yarn workspace @botvy/client build && nodemon --spawn --cwd . --config ./nodemon.json ./packages/client/dist/index.js",
         "commit": "git-cz",
         "test": "lerna run test",
-        "lint": "eslint packages/**/src",
+        "lint": "eslint \"packages/**/src/**/*\"",
         "publish": "lerna publish --conventional-commits"
     },
     "workspaces": [
@@ -27,6 +28,7 @@
         "husky": "^4.2.5",
         "lerna": "^3.20.2",
         "lint-staged": "^10.2.2",
+        "nodemon": "^2.0.4",
         "prettier": "^2.0.5"
     },
     "config": {
@@ -40,6 +42,11 @@
         }
     },
     "lint-staged": {
-        "*.{js,ts,tsx,json,md}": "prettier --write"
+        "*.{js,ts,tsx}": [
+            "prettier --write",
+            "eslint --fix",
+            "git add"
+        ],
+        "*.{json,md}": "prettier --write"
     }
 }
