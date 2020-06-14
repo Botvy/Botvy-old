@@ -1,11 +1,11 @@
-import { validateSchema } from '@botvy/framework/dist/schema/helper';
-import { themeSchema } from '@botvy/framework/dist/schema/themeSchema';
 import { existsSync, FSWatcher, readFileSync, watch } from 'fs';
 import { inject, injectable } from 'inversify';
 import { resolve } from 'path';
 import { Logger } from 'winston';
 
 import { ServiceConstants } from '../ioc/ServiceConstants';
+import { validateSchema } from '../schema/helper';
+import { themeSchema } from '../schema/themeSchema';
 import { ITheme } from './ITheme';
 
 /**
