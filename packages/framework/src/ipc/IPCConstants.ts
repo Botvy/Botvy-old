@@ -4,7 +4,7 @@
 export const IPCConstants = {
     Core: {
         Settings: {
-            Load: Symbol.for('IPC.Core.Settings.Load'),
+            Load: Symbol.for('Core.IPC.Settings.Load'),
         },
     },
 };
