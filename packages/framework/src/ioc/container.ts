@@ -5,6 +5,7 @@ import { PluginContainerModule } from '../ioc/module/PluginContainerModule';
 import { InitializationSide } from '../plugin/InitializationSide';
 import { ClientSettingsHandler } from '../settings/ClientSettingsLoader';
 import { TestContainerModule } from './module/TestContainerModule';
+import { ThemeContainerModule } from './module/ThemeContainerModule';
 import { ServiceConstants } from './ServiceConstants';
 
 /**
