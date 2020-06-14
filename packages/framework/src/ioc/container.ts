@@ -29,7 +29,11 @@ export async function getConfiguredContainer(
         .bind(ServiceConstants.System.CurrentWorkingDirectory)
         .toConstantValue(process.cwd());
 
-    container.load(new PluginContainerModule(), new LoggerContainerModule());
+    container.load(
+        new PluginContainerModule(),
+        new LoggerContainerModule(),
+        new ThemeContainerModule(),
+    );
 
     switch (initializationSide) {
         case InitializationSide.CLIENT:
