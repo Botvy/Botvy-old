@@ -1,6 +1,6 @@
 import { validateSchema } from '@botvy/framework/dist/schema/helper';
 import { themeSchema } from '@botvy/framework/dist/schema/themeSchema';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, FSWatcher, readFileSync, watch } from 'fs';
 import { inject, injectable } from 'inversify';
 import { resolve } from 'path';
 import { Logger } from 'winston';
@@ -17,7 +17,34 @@ import { ITheme } from './ITheme';
  */
 @injectable()
 export class ThemeManager {
-    private themeDirectory: string;
+    /**
+     * Contains the resolved path to the "themes" directory
+     *
+     * @private
+     * @type {string}
+     * @memberof ThemeManager
+     */
+    private readonly themeDirectory: string;
+
+    /**
+     * Contains the name of the theme which is currently active
+     *
+     * @private
+     * @type {string}
+     * @memberof ThemeManager
+     */
+    private currentTheme: string;
+
+    public fileChangeListener?: (...args: any[]) => void;
+
+    /**
+     * The file watcher which should be used to check for theme file changes
+     *
+     * @private
+     * @type {FSWatcher}
+     * @memberof ThemeManager
+     */
+    private fileWatcher?: FSWatcher;
 
     /**
      * Creates an instance of ThemeManager.
@@ -30,6 +57,7 @@ export class ThemeManager {
         @inject(ServiceConstants.System.CurrentWorkingDirectory) cwd: string,
     ) {
         this.themeDirectory = resolve(cwd, 'themes');
+        this.currentTheme = '';
     }
 
     /**
@@ -42,7 +70,7 @@ export class ThemeManager {
      */
     public checkIfThemeExists(themeName: string): boolean {
         this.logger.debug(`Checking if theme "${themeName}" exists`);
-        return existsSync(resolve(this.themeDirectory, `${themeName}.json`));
+        return existsSync(this.getResolvedThemePath(themeName));
     }
 
     /**
@@ -57,8 +85,12 @@ export class ThemeManager {
             throw new Error(`Could not find theme: ${themeName}`);
         }
 
+        if (themeName !== this.currentTheme) {
+            this.setCurrentTheme(themeName);
+        }
+
         const fileContents = readFileSync(
-            resolve(this.themeDirectory, `${themeName}.json`),
+            this.getResolvedThemePath(themeName),
             'utf-8',
         );
         const parsedFileContents = JSON.parse(fileContents);
@@ -70,5 +102,23 @@ export class ThemeManager {
         }
 
         return parsedFileContents;
+    }
+
+    private getResolvedThemePath(themeName: string): string {
+        return resolve(this.themeDirectory, `${themeName}.json`);
+    }
+
+    private setCurrentTheme(themeName: string) {
+        if (this.fileWatcher !== undefined) {
+            this.fileWatcher.close();
+        }
+
+        this.currentTheme = themeName;
+
+        this.fileWatcher = watch(this.getResolvedThemePath(themeName));
+
+        if (this.fileChangeListener !== undefined) {
+            this.fileWatcher.on('change', this.fileChangeListener);
+        }
     }
 }

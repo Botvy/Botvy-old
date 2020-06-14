@@ -8,6 +8,7 @@ export const IPCConstants = {
         },
         Theming: {
             LoadTheme: Symbol.for('Core.Theming.LoadTheme'),
+            ThemeUpdated: Symbol.for('Core.Theming.ThemeUpdated'),
         },
     },
 };

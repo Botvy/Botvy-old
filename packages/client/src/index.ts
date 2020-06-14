@@ -1,13 +1,13 @@
 import 'reflect-metadata';
 
 import { ServiceConstants } from '@botvy/framework/dist/ioc/ServiceConstants';
+import { IPCConstants } from '@botvy/framework/dist/ipc/IPCConstants';
 import { IPCEventHandler } from '@botvy/framework/dist/ipc/IPCEventHandler';
 import { configureLogger } from '@botvy/framework/dist/logging/logger';
+import { ThemeManager } from '@botvy/framework/dist/theming/ThemeManager';
 import { app, BrowserWindow, ipcMain } from 'electron';
-import installExtension, {
-    REACT_DEVELOPER_TOOLS,
-    REDUX_DEVTOOLS,
-} from 'electron-devtools-installer';
+import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer';
+import { basename } from 'path';
 import { Logger } from 'winston';
 
 import { getClientContainer } from './ioc/container';
@@ -19,6 +19,18 @@ let mainWindow: BrowserWindow;
 
 (async () => {
     const container = await getClientContainer();
+
+    const themeManager = container.get(ThemeManager);
+
+    themeManager.fileChangeListener = (event: string, fileName: string) => {
+        const themeName = basename(fileName, '.json');
+        const updatedTheme = themeManager.loadTheme(themeName);
+
+        mainWindow.webContents.send(
+            IPCConstants.Core.Theming.ThemeUpdated.toString(),
+            updatedTheme,
+        );
+    };
 
     const logger = container.get<Logger>(ServiceConstants.System.Logger);
     configureLogger(logger, 'Client');
