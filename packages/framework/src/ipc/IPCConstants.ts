@@ -6,5 +6,8 @@ export const IPCConstants = {
         Settings: {
             Load: Symbol.for('Core.IPC.Settings.Load'),
         },
+        Theming: {
+            LoadTheme: Symbol.for('Core.Theming.LoadTheme'),
+        },
     },
 };

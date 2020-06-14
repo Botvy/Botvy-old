@@ -1,18 +1,21 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
+import '../../../node_modules/react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
 import App from './App';
+import { ApplicationInitializator } from './ApplicationInitializator';
+import ConnectedThemeProvider from './components/ConnectedThemeProvider';
 import { store } from './store/store';
 
-render(<App />, document.getElementById('app'));
+const applicationInitializator = new ApplicationInitializator(store);
+applicationInitializator.initialize();
 
-if ((module as any).hot) {
-    (module as any).hot.accept();
-}
 render(
     <Provider store={store}>
+        <ConnectedThemeProvider>
             <App/>
+        </ConnectedThemeProvider>
     </Provider>,
     document.getElementById('app'),
 );

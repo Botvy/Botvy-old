@@ -6,6 +6,7 @@ import { Logger } from 'winston';
 import { ServiceConstants } from '../ioc/ServiceConstants';
 import { clientSettingsSchema } from '../schema/clientSettings';
 import { validateSchema } from '../schema/helper';
+import { ThemeManager } from '../theming/ThemeManager';
 import { IClientSettings } from './IClientSettings';
 
 /**
@@ -28,12 +29,15 @@ export class ClientSettingsHandler {
     /**
      * Creates an instance of ClientSettingsHandler.
      * @param {Logger} logger The logger which should be used to log messages
+     * @param {ThemeManager} themeManager The theme manager which should be used to check if themes exists
      * @param {string} currentWorkingDirectory The current working directory
      * @memberof ClientSettingsHandler
      */
     constructor(
         @inject(ServiceConstants.System.Logger)
         private readonly logger: Logger,
+        @inject(ThemeManager)
+        private readonly themeManager: ThemeManager,
         @inject(ServiceConstants.System.CurrentWorkingDirectory)
         currentWorkingDirectory: string,
     ) {
@@ -72,6 +76,14 @@ export class ClientSettingsHandler {
             )
         ) {
             throw new Error('Settings file not valid');
+        }
+
+        if (!this.themeManager.checkIfThemeExists(parsedSettingsFile.theme)) {
+            if (!this.themeManager.checkIfThemeExists('white')) {
+                throw new Error(`Could not load any theme`);
+            }
+
+            parsedSettingsFile.theme = 'white';
         }
 
         return parsedSettingsFile;
