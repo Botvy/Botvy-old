@@ -44,19 +44,23 @@ export class ApplicationInitializator {
 
         const clientSettings = await this.loadSettings();
 
-        if (clientSettings.error || !clientSettings.data) {
+        if (clientSettings.error) {
+            this.store.dispatch(initializationFailed(clientSettings.error));
             return;
         }
+
+        const { theme, activePlugins } = clientSettings.data!;
 
         this.store.dispatch(setStepInfo('Loading theme'));
 
-        const theme = await this.loadTheme(clientSettings.data.theme);
+        const loadedTheme = await this.loadTheme(theme);
 
-        if (theme.error || !theme.data) {
+        if (loadedTheme.error) {
+            this.store.dispatch(initializationFailed(loadedTheme.error));
             return;
         }
 
-        this.store.dispatch(setTheme(theme.data));
+        this.store.dispatch(setTheme(loadedTheme.data!));
         this.store.dispatch(finishInitialization());
     }
 

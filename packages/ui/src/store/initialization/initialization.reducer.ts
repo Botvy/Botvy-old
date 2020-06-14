@@ -3,12 +3,14 @@ import { AnyAction } from 'redux';
 import { IInitializationState } from './IInitializationState';
 import {
     FINISH_INITIALIZATION,
+    INITIALIZATION_FAILED,
     SET_STEP_INFO,
     SET_SUBSTEP_INFO,
 } from './initialization.actions';
 
 const initialState: IInitializationState = {
     initializing: true,
+    error: undefined,
     step: undefined,
     subStep: undefined,
 };
@@ -32,6 +34,12 @@ export const InitializationReducer = (
             return {
                 ...state,
                 subStep: action.subStep,
+            };
+
+        case INITIALIZATION_FAILED:
+            return {
+                ...state,
+                error: action.error,
             };
 
         case FINISH_INITIALIZATION:

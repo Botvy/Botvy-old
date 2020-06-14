@@ -13,6 +13,8 @@ export interface IInitializationState {
      */
     initializing: boolean;
 
+    error?: string;
+
     /**
      * Contains the name of the current operation
      *

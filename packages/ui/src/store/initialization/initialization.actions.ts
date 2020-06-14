@@ -1,9 +1,15 @@
 import { AnyAction } from 'redux';
 
+export const INITIALIZATION_FAILED = 'botvy/initialization/INITIALIZATION_FAILED';
 export const SET_STEP_INFO = 'botvy/initialization/SET_STEP_INFO';
 export const SET_SUBSTEP_INFO = 'botvy/initialization/SET_SUB_STEP_INFO';
 export const FINISH_INITIALIZATION =
-    'botvy/initialization/FINISH_INITIALIZATION';
+                 'botvy/initialization/FINISH_INITIALIZATION';
+
+export const initializationFailed = (error: string): AnyAction => ({
+    type: INITIALIZATION_FAILED,
+    error,
+});
 
 /**
  * Returns an action with which the initialization can be finished
