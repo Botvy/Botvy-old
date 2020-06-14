@@ -19,21 +19,23 @@ let mainWindow: BrowserWindow;
 
 (async () => {
     const container = await getClientContainer();
-
     const themeManager = container.get(ThemeManager);
-
-    themeManager.fileChangeListener = (event: string, fileName: string) => {
-        const themeName = basename(fileName, '.json');
-        const updatedTheme = themeManager.loadTheme(themeName);
-
-        mainWindow.webContents.send(
-            IPCConstants.Core.Theming.ThemeUpdated.toString(),
-            updatedTheme,
-        );
-    };
-
     const logger = container.get<Logger>(ServiceConstants.System.Logger);
     configureLogger(logger, 'Client');
+
+    themeManager.fileChangeListener = (event: string, fileName: string) => {
+        try {
+            const themeName = basename(fileName, '.json');
+            const updatedTheme = themeManager.loadTheme(themeName);
+
+            mainWindow.webContents.send(
+                IPCConstants.Core.Theming.ThemeUpdated.toString(),
+                updatedTheme,
+            );
+        } catch (error) {
+            logger.error(error);
+        }
+    };
 
     try {
         const ipcEventHandlers = container.getAll(IPCEventHandler);
