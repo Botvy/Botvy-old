@@ -28,9 +28,9 @@ export class IPCResult<T> {
      * @type {string}
      * @memberof IIPCResult
      */
-    error?: string;
+    error?: Error;
 
-    constructor(success: boolean, data?: T, error?: string) {
+    constructor(success: boolean, data?: T, error?: Error) {
         this.success = success;
         this.data = data;
         this.error = error;
@@ -40,7 +40,7 @@ export class IPCResult<T> {
         return new IPCResult(true, data, undefined);
     }
 
-    public static CreateFailedResult<T>(error: string) {
+    public static CreateFailedResult<T>(error: Error) {
         return new IPCResult(false, {} as T, error);
     }
 }

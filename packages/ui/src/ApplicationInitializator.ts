@@ -1,6 +1,5 @@
 import { IPCConstants } from '@botvy/framework/dist/ipc/IPCConstants';
 import { IPCResult } from '@botvy/framework/dist/ipc/IPCResult';
-import { IPluginDescriptionFile } from '@botvy/framework/dist/plugin/IPlugin';
 import { IClientSettings } from '@botvy/framework/dist/settings/IClientSettings';
 import { ITheme } from '@botvy/framework/dist/theming/ITheme';
 import { IpcRenderer } from 'electron';
@@ -46,7 +45,7 @@ export class ApplicationInitializator {
         const clientSettings = await this.loadSettings();
 
         if (clientSettings.error) {
-            this.store.dispatch(initializationFailed(clientSettings.error));
+            this.store.dispatch(initializationFailed(clientSettings.error.message));
             return;
         }
 
@@ -57,7 +56,7 @@ export class ApplicationInitializator {
         const loadedTheme = await this.loadTheme(theme);
 
         if (loadedTheme.error) {
-            this.store.dispatch(initializationFailed(loadedTheme.error));
+            this.store.dispatch(initializationFailed(loadedTheme.error.message));
             return;
         }
 
@@ -67,8 +66,8 @@ export class ApplicationInitializator {
 
         const loadPluginsResult = await this.loadPlugins(activePlugins);
 
-        if (loadPluginsResult.error) {
-            this.store.dispatch(initializationFailed(loadPluginsResult.error));
+        if (loadPluginsResult.success === false) {
+            this.store.dispatch(initializationFailed(loadPluginsResult.error!.message));
             return;
         }
 
