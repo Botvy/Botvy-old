@@ -57,7 +57,7 @@ export interface IPluginDescriptionFile extends IPlugin {
 
     /**
      * The section components will be send to the electron renderer process
-     * where they get required and displayed at their specified section
+     * where they get included and displayed at their specified section
      *
      * All entries in the value of the record must point to existing files
      * Each file must have a default exported React component
