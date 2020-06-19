@@ -6,7 +6,7 @@ import { Logger } from 'winston';
 import { ServiceConstants } from '../../ioc/ServiceConstants';
 import { validateSchema } from '../../schema/helper';
 import { pluginDescriptorSchema } from '../../schema/pluginDescriptor';
-import { IPlugin, IPluginDescriptionFile } from '../IPlugin';
+import { IPluginDescriptionFile } from '../IPlugin';
 import { IPluginLoader } from './IPluginLoader';
 
 /**
@@ -62,10 +62,10 @@ export class DirectoryPluginLoader implements IPluginLoader {
      * @returns {Promise<IPluginDescriptionFile[]>} The loaded plugins
      * @memberof DirectoryPluginLoader
      */
-    public async loadPlugins(): Promise<IPlugin[]> {
+    public async loadPlugins(): Promise<IPluginDescriptionFile[]> {
         const pluginsPath = resolve(process.cwd(), this.directoryPath);
 
-        const result: IPlugin[] = [];
+        const result: IPluginDescriptionFile[] = [];
 
         this.logger.debug(`Plugins directory: ${pluginsPath}`);
 
