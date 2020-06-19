@@ -138,10 +138,7 @@ export class DirectoryPluginLoader implements IPluginLoader {
                     this.logger,
                 )
             ) {
-                this.logger.error(
-                    `The plugin.json in the directory "${pluginDirectory}" is not valid`,
-                );
-                continue;
+                throw new Error(`The plugin.json in the directory "${pluginDirectory}" is not valid`);
             }
 
             const { id: pluginId } = parsedPluginDescriptor;
