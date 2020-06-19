@@ -102,7 +102,17 @@ export class ApplicationInitializator {
         );
     }
 
-    private async loadPlugins(activePlugins: string[]): Promise<IPCResult<IPluginDescriptionFile>> {
+    /**
+     * Invokes the IPC command to load all plugins
+     *
+     * @private
+     * @param {string[]} activePlugins The array of active plugins
+     * @returns {Promise<IPCResult<undefined>>}
+     * @memberof ApplicationInitializator
+     */
+    private async loadPlugins(
+        activePlugins: string[],
+    ): Promise<IPCResult<undefined>> {
         return await this.ipcRenderer.invoke(
             IPCConstants.Core.Plugins.LoadActive.toString(),
             activePlugins,
