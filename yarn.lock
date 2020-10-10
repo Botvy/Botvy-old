@@ -1748,9 +1748,9 @@
     "@types/react" "*"
 
 "@types/react-loader-spinner@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@types/react-loader-spinner/-/react-loader-spinner-3.1.0.tgz#87100b00f9052395dfd27ec762713c32dd7e6f9e"
-  integrity sha512-gqxW+lmItQYnPiAoyvgg5X89ZsUVQ5SwzFieFPcmr13wQ9kahq448267Qj8HsrrGn1ON1hboFPPbpee4eU28Dg==
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@types/react-loader-spinner/-/react-loader-spinner-3.1.1.tgz#f6b758a018352afd6a144c60eee56d96a2e88581"
+  integrity sha512-WCKY98DZtCBXAW1MlR9Q67p9VfozgpleDnGT86foLAAYUxKcpHRyzKxjNwW98fxKHmFroOX0OLz3SaqOnWccWg==
   dependencies:
     "@types/react" "*"
 
